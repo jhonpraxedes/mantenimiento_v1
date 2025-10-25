@@ -1,0 +1,18 @@
+[
+  {
+    "maquinaria_id": "1",
+    "temperatura": 82.4,
+    "vibracion": 12.3,
+    "presion_aceite": 78.0,
+    "ts": "2025-10-22T12:00:00Z",
+    "estado": "OK"
+  },
+  {
+    "maquinaria_id": "2",
+    "temperatura": 91.1,
+    "vibracion": 22.5,
+    "presion_aceite": 55.0,
+    "ts": "2025-10-22T12:00:00Z",
+    "estado": "ALERTA"
+  }
+]
