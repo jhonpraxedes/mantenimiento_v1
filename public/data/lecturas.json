@@ -1,18 +1,35 @@
 [
   {
-    "maquinaria_id": "1",
+    "numero_serie": "hyundai333",
     "temperatura": 82.4,
     "vibracion": 12.3,
     "presion_aceite": 78.0,
-    "ts": "2025-10-22T12:00:00Z",
-    "estado": "OK"
+    "ts": "2025-10-22T12:00:00Z"
+  
   },
   {
-    "maquinaria_id": "2",
+    "numero_serie": "komatsu123",
     "temperatura": 91.1,
-    "vibracion": 22.5,
+    "vibracion": 4.5,
     "presion_aceite": 55.0,
-    "ts": "2025-10-22T12:00:00Z",
-    "estado": "ALERTA"
+    "ts": "2025-10-22T12:00:00Z"
+    
+  },
+
+  
+  {
+    "numero_serie": "CAT320D-001",
+    "temperatura": 75.2,
+    "vibracion": 3.8,
+    "presion_aceite": 45,
+    "ts": "2025-10-24T12:00:00Z"
+  },
+  {
+    "numero_serie": "KOMD85-045",
+    "temperatura": 92.0,
+    "vibracion": 8.2,
+    "presion_aceite": 60,
+    "ts": "2025-10-24T12:05:00Z"
   }
+
 ]

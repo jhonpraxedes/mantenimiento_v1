@@ -178,12 +178,12 @@ const Usuarios: React.FC = () => {
         <ProFormText
           name="code"
           label="Código"
-          placeholder="Ej: ADM-001, OPR-001"
+          placeholder="Ej: ADM001, OPR001"
           rules={[
             { required: true, message: 'El código es requerido' },
             {
-              pattern: /^[A-Z]{3}-\d{3}$/,
-              message: 'Formato: XXX-000 (Ej: ADM-001)',
+              pattern: /^[A-Z]{3}\d{3}$/,
+              message: 'Formato: XXX000 (Ej: ADM001)',
             },
           ]}
         />

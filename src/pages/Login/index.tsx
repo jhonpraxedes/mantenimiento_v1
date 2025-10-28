@@ -1,14 +1,9 @@
-import { loginLocal } from '@/services/auth';
-import { UsuariosService } from '@/services/usuarios';
-import { LockOutlined, MailOutlined } from '@ant-design/icons';
-import {
-  LoginForm,
-  ProFormCheckbox,
-  ProFormText,
-} from '@ant-design/pro-components';
-import { history, useModel } from '@umijs/max';
-import { Alert, message } from 'antd';
+// src/pages/Login.tsx
 import React, { useState } from 'react';
+import { LoginForm, ProFormCheckbox, ProFormText } from '@ant-design/pro-components';
+import { message, Alert } from 'antd';
+import { history, useModel } from '@umijs/max';
+import { loginByUsuarioCode, getCurrentUser } from '@/services/auth';
 
 const Login: React.FC = () => {
   const { setInitialState } = useModel('@@initialState');
@@ -17,21 +12,19 @@ const Login: React.FC = () => {
 
   React.useEffect(() => {
     (async () => {
-      // verificar si existe en localStorage y redirigirlo al home
+      const current = getCurrentUser();
+      if (current) {
+        await setInitialState((s: any) => ({ ...s, currentUser: current }));
+        history.replace('/dashboard');
+      }
     })();
-  }, []);
+  }, [setInitialState]);
 
-  const handleSubmit = async (values: { email: string; password: string }) => {
+  const handleSubmit = async (values: { code: string; name: string; autoLogin?: boolean }) => {
     setSubmitting(true);
     setErrorMsg(null);
     try {
-      const isUserAccepted = await UsuariosService.actualizar({
-        name: values.email.trim(),
-        errorCode: values.password,
-      });
-
-      console.info(isUserAccepted);
-      const user = await loginLocal(values.email.trim(), values.password);
+      const user = await loginByUsuarioCode(values.code.trim(), values.name.trim(), !!values.autoLogin);
       await setInitialState((s: any) => ({ ...s, currentUser: user }));
       message.success(`Bienvenido, ${user.name}`);
       history.push('/dashboard');
@@ -43,54 +36,38 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'grid',
-        placeItems: 'center',
-        padding: 16,
-      }}
-    >
+    <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: 16 }}>
       <LoginForm
         onFinish={handleSubmit}
-        submitter={{
-          searchConfig: { submitText: 'Ingresar' },
-          submitButtonProps: { loading: submitting },
-        }}
+        submitter={{ searchConfig: { submitText: 'Ingresar' }, submitButtonProps: { loading: submitting } }}
         title="Sistema de Mantenimiento Predictivo"
-        subTitle="Empresas de maquinaria pesada en Guatemala"
+        subTitle="Inicia sesión con código y nombre"
       >
-        {errorMsg && (
-          <Alert
-            type="error"
-            showIcon
-            style={{ marginBottom: 16 }}
-            message={errorMsg}
-          />
-        )}
+        {errorMsg && <Alert type="error" showIcon style={{ marginBottom: 16 }} message={errorMsg} />}
+
         <ProFormText
-          name="email"
-          fieldProps={{ size: 'large', prefix: <MailOutlined /> }}
-          placeholder="Correo (ej: admin@demo.com)"
+          name="code"
+          fieldProps={{ size: 'large' }}
+          placeholder="Código (ej: ADM001)"
           rules={[
-            { required: true, message: 'Ingresa tu correo' },
-            { type: 'string', message: 'Correo inválido' },
+            { required: true, message: 'Ingresa tu código' },
+            { pattern: /^[A-Za-z0-9_-]{3,20}$/, message: 'Código inválido' },
           ]}
         />
-        <ProFormText.Password
-          name="password"
-          fieldProps={{ size: 'large', prefix: <LockOutlined /> }}
-          placeholder="Contraseña (ej: 123456)"
-          rules={[{ required: true, message: 'Ingresa tu contraseña' }]}
+
+        <ProFormText
+          name="name"
+          fieldProps={{ size: 'large' }}
+          placeholder="Nombre (ej: Juan)"
+          rules={[{ required: true, message: 'Ingresa tu nombre' }]}
         />
+
         <div style={{ marginBlockEnd: 12 }}>
-          <ProFormCheckbox noStyle name="autoLogin">
-            Recordarme
-          </ProFormCheckbox>
+          <ProFormCheckbox noStyle name="autoLogin">Recordarme</ProFormCheckbox>
         </div>
+
         <div style={{ color: '#999' }}>
-          Demo: admin@demo.com / 123456 (Administrador) • user@demo.com / 123456
-          (Operador)
+          Ejemplos: ADM001 - Juan, OPR001 - Maria
         </div>
       </LoginForm>
     </div>

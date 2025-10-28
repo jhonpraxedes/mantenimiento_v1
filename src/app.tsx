@@ -1,60 +1,63 @@
-import { logoutLocal } from '@/services/auth';
+// src/app.tsx
+import React from 'react';
+import { getCurrentUser, logoutLocal } from '@/services/auth';
 import type { RunTimeLayoutConfig } from '@umijs/max';
 import { history } from '@umijs/max';
 import { Button, Space, Tag } from 'antd';
 
 export async function getInitialState() {
-  const raw = localStorage.getItem('currentUser');
-  const currentUser = raw ? JSON.parse(raw) : undefined;
-  return { currentUser };
+  try {
+    const currentUser = getCurrentUser();
+    return { currentUser };
+  } catch (err) {
+    console.error('Error al cargar initialState', err);
+    return { currentUser: undefined };
+  }
 }
 
-export const layout: RunTimeLayoutConfig = ({
-  initialState,
-  setInitialState,
-}) => ({
-  title: 'Mantenimiento Predictivo',
-  onPageChange: () => {
-    const { location } = history;
-    const isLogin = location.pathname === '/login';
-    // Ajuste: permitir /inicio (y /) sin login si quieres que Inicio sea pública
-    const isInicio =
-      location.pathname === '/inicio' || location.pathname === '/';
-    const logged = !!initialState?.currentUser;
+export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
+  const publicPaths = ['/login', '/inicio', '/'];
 
-    if (!logged && !isLogin && !isInicio) {
-      history.push('/login');
-    }
-  },
-  headerRender: (headerProps, defaultDom) => {
-    const user = initialState?.currentUser;
-    if (!user) return defaultDom; // deja el header por defecto sin botón
+  return {
+    title: 'Mantenimiento Predictivo',
 
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-        {/* Izquierda: DOM por defecto (logo, título, breadcrumb) */}
-        <div style={{ flex: 1 }}>{defaultDom}</div>
+    onPageChange: () => {
+      if (initialState === undefined) return;
+      const pathname = history.location.pathname;
+      const isPublic = publicPaths.includes(pathname);
+      const logged = !!initialState?.currentUser;
+      if (!logged && !isPublic) {
+        history.replace('/login');
+      }
+    },
 
-        {/* Derecha: usuario + botón logout */}
-        <Space style={{ marginRight: 16 }}>
-          <Tag color="blue">
-            {user.name} · {user.rol}
-          </Tag>
-          <Button
-            size="small"
-            onClick={async () => {
-              logoutLocal();
-              await setInitialState?.((s: any) => ({
-                ...s,
-                currentUser: undefined,
-              }));
-              history.push('/login');
-            }}
-          >
-            Cerrar sesión
-          </Button>
-        </Space>
-      </div>
-    );
-  },
-});
+    headerRender: (headerProps, defaultDom) => {
+      // DEBUG: descomenta si quieres ver el estado en consola
+      // console.log('headerRender initialState:', initialState);
+
+      const user = initialState?.currentUser;
+      if (!user) return defaultDom;
+
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+          <div style={{ flex: 1 }}>{defaultDom}</div>
+          <Space style={{ marginRight: 16 }}>
+            <Tag color="blue">
+              {user.name} · {user.rol}
+            </Tag>
+            <Button
+              size="small"
+              onClick={async () => {
+                logoutLocal();
+                await setInitialState?.((s: any) => ({ ...s, currentUser: undefined }));
+                history.replace('/login');
+              }}
+            >
+              Cerrar sesión
+            </Button>
+          </Space>
+        </div>
+      );
+    },
+  };
+};
